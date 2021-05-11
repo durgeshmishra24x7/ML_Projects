@@ -1,0 +1,55 @@
+#Import Libraries
+import pandas as pd
+import numpy as np
+from sklearn import linear_model
+
+# Load CSV File
+path = r"C:\Users\Durgesh.Mishra\OneDrive - EY\ML_Learning\Dataset\hiring.csv"
+df= pd.read_csv(path)
+df
+
+df.experience = df.fillna('zero')
+df
+
+#Convert word to number  
+from word2number import w2n
+df.experience = df.experience.apply(w2n.word_to_num)
+df
+
+#Handle NaN value in test_score
+import math
+median_test_score = math.floor(df['test_score(out of 10)'].median())
+df['test_score(out of 10)'] = df['test_score(out of 10)'].fillna(median_test_score)
+df
+
+#Build Model object
+reg = linear_model.LinearRegression()
+
+#Train model, define independent features as a input and dependent as a target
+reg.fit(df[['experience','test_score(out of 10)','interview_score(out of 10)']],df['salary($)'])
+
+#Check Coefficient
+reg.coef_
+
+#Check Intercept
+reg.intercept_
+
+#Predict Salary
+reg.predict([[2,9,6]])
+
+reg.predict([[12,10,10]])
+
+df['predicted_Salary']=reg.predict(df[['experience','test_score(out of 10)','interview_score(out of 10)']])
+df
+
+import matplotlib.pyplot as plt
+plt.xlabel('Experience',fontsize = 20)
+plt.ylabel('Salary',fontsize=20)
+plt.scatter(df.experience,df['predicted_Salary'],color = 'blue',marker='*')
+plt.plot(df.experience,df['interview_score(out of 10)'],df['predicted_Salary'],color = 'red') 
+
+
+import seaborn as sns
+sns.pairplot(df, x_vars=['experience','test_score(out of 10)','interview_score(out of 10)'], y_vars='salary($)', size=7, aspect=0.7, kind='reg')
+
+
